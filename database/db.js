@@ -10,7 +10,7 @@ const dbConnection = async () => {
     mongoose.connection.on('close', () => console.log('close'));
 
     try {
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(process.env.DB_CDN);
 
     } catch (error) {
         console.log(error);
