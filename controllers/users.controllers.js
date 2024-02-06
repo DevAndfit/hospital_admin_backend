@@ -7,8 +7,12 @@ const { generateJWT } = require('../helpers/jwt');
 
 const getUsers = async (req, res = response) => {
 
-    const users = await User.find({}, '_id name email role google');
-    const total = users.length;
+    const from = Number(req.query.from) || 0;
+
+   const [ users, total ] = await Promise.all([
+        User.find({}, '_id name email role google').skip(from).limit(5),
+        User.countDocuments()
+    ]);
 
     try {
         res.json({
@@ -35,12 +39,13 @@ const createUser = async (req, res = response) => {
         //verificiacion de email en la bd
         const emailExist = await User.findOne({ email });
         //manejo de error si el email ya existe
-        if (emailExist) {
+        if ( emailExist ) {
             return res.status(400).json({
                 ok: false,
                 msg: 'El correo ya existe'
             })
         };
+        
         //creacion del nuevo usuario
         const user = new User(req.body)
         //Encriptacion de contraseña

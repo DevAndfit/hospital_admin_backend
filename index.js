@@ -19,6 +19,10 @@ dbConnection();
 //rutas del servidor
 app.use('/api/users', require('./routes/users.routes'));
 app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/hospitals', require('./routes/hospitals.routes'));
+app.use('/api/medicals', require('./routes/medicals.routes'));
+app.use('/api/search', require('./routes/searches.routes'));
+app.use('/api/upload', require('./routes/uploads.routes'));
 
 
 app.listen(process.env.PORT, () => {`
