@@ -15,9 +15,16 @@ router.get('/', validateJWT, getHospitals )
 
 router.post('/', [ validateJWT, check('name','El nombre del hospital es necesario').not().isEmpty(),validateFields ] ,createHospital )
 
-router.put('/:id', [], updateHospital)
+router.put('/:id',
+    [ 
+        validateJWT, 
+        check('id','Ese no es un id valido').isMongoId(),
+        check('name','El nombre del hospital es necesario').not().isEmpty(),
+        validateFields
 
-router.delete('/:id', deleteHospital);
+    ], updateHospital)
+
+router.delete('/:id', [validateJWT, check('id','Ese no es un id valido').isMongoId(), validateFields ], deleteHospital);
 
 
 

@@ -1,6 +1,7 @@
 const { response } = require('express')
 const { validationResult } = require('express-validator');
 const Hospital = require('../models/hospital.model');
+const mongoose = require('mongoose');
 
 
 const getHospitals = async (req, res = response) => {
@@ -42,11 +43,93 @@ const createHospital = async (req, res = response) => {
     }
 }
 
-const updateHospital = (req, res = response) => { }
+const updateHospital = async (req, res = response) => {
 
-const deleteHospital = (req, res = response) => { }
+    //Recupecion de uid los de los parametros de la peticion
+    const id = req.params.id
+    const userId = req.uid;
 
-const getHospital = (req, res = response) => { }
+    try {
+
+        const isValid = mongoose.Types.ObjectId.isValid(id)
+        if (!isValid) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Parese que ese no es un id valido'
+            }) 
+        }
+
+        //Busqueda del hospital en la db por el uid
+        const hospitalDB = await Hospital.findById(id);
+        //Manejo de error si el usuario no existe
+        if (!hospitalDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No existe un hospital con ese id'
+            })
+        };
+
+        //Actualizacion del usuario
+        const newHospital = {
+            ...req.body,
+            user: userId
+        }
+
+        const hospitalUpdated = await Hospital.findByIdAndUpdate(id, newHospital, {new:true});
+
+        res.json({
+            ok: true,
+            msg: `${ hospitalDB.name } fue actualizado`,
+            hospitalUpdated
+        })
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok:false,
+            msg:'Algo salio mal'
+        })
+    }
+
+
+ }
+
+const deleteHospital = async (req, res = response) => {
+    //Recupecion de uid los de los parametros de la peticion
+    const id = req.params.id
+    try {
+        const isValid = mongoose.Types.ObjectId.isValid(id)
+        if (!isValid) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Parese que ese no es un id valido'
+            }) 
+        }
+        const hospitalDB = await Hospital.findById(id);
+        if (!hospitalDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No existe un hospital con ese id'
+            })
+        }
+
+        await Hospital.findByIdAndDelete(id);
+
+        res.json({
+            ok:true,
+            msg:`${ hospitalDB.name } eliminado/a`,
+        })
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok:false,
+            msg:'Error inesperado, hable con el administrador'
+        })  
+    }
+ }
+
+const getHospital = async (req, res = response) => { }
 
 module.exports = {
     getHospitals,
